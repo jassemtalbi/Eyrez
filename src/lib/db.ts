@@ -3,10 +3,20 @@ import { promises as fs } from "fs";
 import path from "path";
 import { randomUUID } from "crypto";
 import { seedProducts, type Product } from "./products";
-import type { Order } from "./types";
+import type { AdminUser, Order } from "./types";
 import { demoOrders } from "./demo-orders";
 
-type Data = { products: Product[]; orders: Order[]; orderSeq: number };
+type Data = { products: Product[]; orders: Order[]; orderSeq: number; admins: AdminUser[] };
+
+/** Initial admin accounts (passwords are stored as scrypt hashes only). */
+const seedAdmins: AdminUser[] = [
+  {
+    username: "eyabenghenia",
+    passwordHash:
+      "scrypt$32768$8$1$44Qpcw96tuvQYkWH+hr1Jw==$jYeWSbFgNryAQy9ewhkmEFFeJy1mCp6ggdy+zbgzXgDSNdOcjHerm+govb5QI+4r/mcpSA6IL1D7yxKDAG608A==",
+    createdAt: "2026-10-15T00:00:00.000Z",
+  },
+];
 
 const DATA_DIR = process.env.DATA_DIR ?? path.join(process.cwd(), "data");
 const FILE = path.join(DATA_DIR, "db.json");
@@ -18,10 +28,14 @@ async function load(): Promise<Data> {
   if (cache) return cache;
   try {
     cache = JSON.parse(await fs.readFile(FILE, "utf8")) as Data;
+    if (!cache.admins?.length) {
+      cache.admins = structuredClone(seedAdmins);
+      await persist(cache);
+    }
   } catch {
     const withDemo = process.env.NODE_ENV !== "production" || process.env.SEED_DEMO_ORDERS === "1";
     const orders = withDemo ? demoOrders(seedProducts) : [];
-    cache = { products: structuredClone(seedProducts), orders, orderSeq: 1000 + orders.length };
+    cache = { products: structuredClone(seedProducts), orders, orderSeq: 1000 + orders.length, admins: structuredClone(seedAdmins) };
     await persist(cache);
   }
   return cache;
@@ -44,6 +58,19 @@ function mutate<T>(fn: (data: Data) => T | Promise<T>): Promise<T> {
   });
   queue = run.catch(() => {});
   return run;
+}
+
+// ---- Admins ----
+export async function getAdmin(username: string) {
+  return (await load()).admins.find((a) => a.username === username);
+}
+
+export function setAdminPassword(username: string, passwordHash: string) {
+  return mutate((data) => {
+    const admin = data.admins.find((a) => a.username === username);
+    if (!admin) throw new Error("Account not found.");
+    admin.passwordHash = passwordHash;
+  });
 }
 
 // ---- Products ----

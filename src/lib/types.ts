@@ -23,6 +23,12 @@ export type Customer = {
   notes?: string;
 };
 
+export type AdminUser = {
+  username: string;
+  passwordHash: string;
+  createdAt: string;
+};
+
 export type Order = {
   id: string;
   number: string;

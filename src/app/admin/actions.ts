@@ -3,15 +3,19 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { SESSION_COOKIE, checkPassword, createSessionToken } from "@/lib/auth";
+import { SESSION_COOKIE, createSessionToken } from "@/lib/auth";
+import { hashPassword, verifyPassword } from "@/lib/passwords";
 import { requireAdmin } from "@/lib/admin";
 import * as db from "@/lib/db";
 import { ORDER_STATUSES, type OrderStatus } from "@/lib/types";
 import { categories } from "@/lib/products";
 
 export async function login(_: string | undefined, form: FormData) {
-  if (!(await checkPassword(String(form.get("password") ?? "")))) return "Incorrect password.";
-  const { token, maxAge } = await createSessionToken();
+  const username = String(form.get("username") ?? "").trim().toLowerCase();
+  const password = String(form.get("password") ?? "");
+  const admin = username ? await db.getAdmin(username) : undefined;
+  if (!admin || !(await verifyPassword(password, admin.passwordHash))) return "Incorrect username or password.";
+  const { token, maxAge } = await createSessionToken(admin.username);
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
@@ -26,6 +30,18 @@ export async function login(_: string | undefined, form: FormData) {
 export async function logout() {
   (await cookies()).delete(SESSION_COOKIE);
   redirect("/admin/login");
+}
+
+export async function changePassword(_: { error?: string; ok?: boolean } | undefined, form: FormData) {
+  const username = await requireAdmin();
+  const admin = await db.getAdmin(username);
+  const current = String(form.get("current") ?? "");
+  const next = String(form.get("next") ?? "");
+  if (!admin || !(await verifyPassword(current, admin.passwordHash))) return { error: "Current password is incorrect." };
+  if (next.length < 8) return { error: "New password must be at least 8 characters." };
+  if (next !== String(form.get("confirm") ?? "")) return { error: "New passwords don’t match." };
+  await db.setAdminPassword(username, await hashPassword(next));
+  return { ok: true };
 }
 
 export async function setOrderStatus(id: string, status: OrderStatus) {

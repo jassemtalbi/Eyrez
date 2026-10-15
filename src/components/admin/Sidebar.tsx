@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { ExternalLink, LayoutDashboard, LogOut, Menu, Package, ShoppingCart, Users, X } from "lucide-react";
+import { ExternalLink, KeyRound, LayoutDashboard, LogOut, Menu, Package, ShoppingCart, Users, X } from "lucide-react";
 import { logout } from "@/app/admin/actions";
 
 const links = [
@@ -14,7 +14,7 @@ const links = [
   { href: "/admin/customers", label: "Customers", icon: Users },
 ];
 
-export default function Sidebar({ pending }: { pending: number }) {
+export default function Sidebar({ pending, username }: { pending: number; username: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const isActive = (href: string) => (href === "/admin" ? pathname === href : pathname.startsWith(href));
@@ -48,6 +48,10 @@ export default function Sidebar({ pending }: { pending: number }) {
         ))}
       </ul>
       <div className="mt-auto space-y-1 border-t border-ivory/10 px-3 py-4">
+        <p className="truncate px-3 pb-2 text-xs text-gold-light">Signed in as {username}</p>
+        <Link href="/admin/account" onClick={() => setOpen(false)} className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-sm ${isActive("/admin/account") ? "bg-ivory/10 text-ivory" : "text-ivory/65 hover:text-ivory"}`}>
+          <KeyRound className="h-4 w-4" strokeWidth={1.6} /> Account
+        </Link>
         <Link href="/" target="_blank" className="flex items-center gap-3 rounded-md px-3 py-2.5 text-sm text-ivory/65 hover:text-ivory">
           <ExternalLink className="h-4 w-4" strokeWidth={1.6} /> View store
         </Link>

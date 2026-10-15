@@ -12,18 +12,20 @@ Luxury e-commerce storefront for **Eyrez Clothing**, built with Next.js (App Rou
 - Cart & wishlist persisted in localStorage; fully responsive
 
 ## Admin dashboard
-Go to **/admin** and sign in with the admin password.
+Go to **/admin** and sign in with an admin account (username + password).
 
 - **Dashboard** — revenue and orders (30 days), average order, pending orders, revenue chart, recent orders, top products, low stock
 - **Orders** — filter by status, search by order number / name / phone, open an order, change its status
   (cancelling an order puts its items back in stock)
 - **Products** — add, edit, hide or delete products; price, old price, stock, sizes, colours, images, “New” and “Bestseller” flags
 - **Customers** — grouped by phone number with order count and total spent
+- **Account** — change your password
 
 Changes in the admin appear on the store immediately. Orders placed at checkout are saved and lower the stock.
 
-In development the password is `eyrez-admin`. In production set `ADMIN_PASSWORD` and `ADMIN_SECRET`
-(see `.env.example`).
+Admin accounts live in the database; passwords are stored only as scrypt hashes. The first account is
+seeded from `seedAdmins` in `src/lib/db.ts`. Each admin can change their password under **Account**.
+In production set `ADMIN_SECRET` (see `.env.example`).
 
 Data is stored in `data/db.json` (created on first run from `src/lib/products.ts`; sample orders are added in development only).
 This needs a server with a writable disk (e.g. a VPS with `npm run build && npm start`). For serverless hosting such as Vercel,

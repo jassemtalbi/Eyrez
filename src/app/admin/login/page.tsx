@@ -1,10 +1,10 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { isAdmin } from "@/lib/admin";
+import { currentAdmin } from "@/lib/admin";
 import LoginForm from "./LoginForm";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
-  if (await isAdmin()) redirect("/admin");
+  if (await currentAdmin()) redirect("/admin");
   const { next } = await searchParams;
   return (
     <div className="flex min-h-screen items-center justify-center bg-espresso px-4">

@@ -10,12 +10,6 @@ function secret() {
   return s;
 }
 
-export function adminPassword() {
-  const p = process.env.ADMIN_PASSWORD ?? (process.env.NODE_ENV !== "production" ? "eyrez-admin" : "");
-  if (!p) throw new Error("ADMIN_PASSWORD must be set in production.");
-  return p;
-}
-
 async function sign(value: string) {
   const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(secret()), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(value));
@@ -29,19 +23,23 @@ function safeEqual(a: string, b: string) {
   return diff === 0;
 }
 
-export async function createSessionToken() {
+const USERNAME = /^[a-z0-9._-]{3,40}$/;
+
+export async function createSessionToken(username: string) {
   const expires = Math.floor(Date.now() / 1000) + MAX_AGE;
-  return { token: `${expires}.${await sign(String(expires))}`, maxAge: MAX_AGE };
+  const payload = `${username}.${expires}`;
+  return { token: `${payload}.${await sign(payload)}`, maxAge: MAX_AGE };
 }
 
+/** Returns the signed-in username, or null. */
 export async function verifySessionToken(token: string | undefined) {
-  if (!token) return false;
-  const [expires, sig] = token.split(".");
-  if (!expires || !sig || Number(expires) < Date.now() / 1000) return false;
-  return safeEqual(sig, await sign(expires));
-}
-
-export async function checkPassword(input: string) {
-  // Compare signatures so timing doesn't leak the password length or prefix.
-  return safeEqual(await sign(`pw:${input}`), await sign(`pw:${adminPassword()}`));
+  if (!token) return null;
+  const i = token.lastIndexOf(".");
+  const payload = token.slice(0, i);
+  const sig = token.slice(i + 1);
+  const j = payload.lastIndexOf(".");
+  const username = payload.slice(0, j);
+  const expires = Number(payload.slice(j + 1));
+  if (i < 0 || j < 0 || !USERNAME.test(username) || !(expires > Date.now() / 1000)) return null;
+  return safeEqual(sig, await sign(payload)) ? username : null;
 }
