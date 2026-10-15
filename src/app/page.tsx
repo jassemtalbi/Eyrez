@@ -54,7 +54,7 @@ export default function Home() {
       </section>
 
       {/* NEW IN */}
-      <section className="bg-cream py-24">
+      <section className="bg-white py-24">
         <div className="container-x">
           <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
             <SectionHeading align="left" eyebrow="Just landed" title="New Arrivals" />
