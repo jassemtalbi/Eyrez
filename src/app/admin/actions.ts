@@ -11,11 +11,20 @@ import { ORDER_STATUSES, type OrderStatus } from "@/lib/types";
 import { categories } from "@/lib/products";
 
 export async function login(_: string | undefined, form: FormData) {
+  if (process.env.NODE_ENV === "production" && !process.env.ADMIN_SECRET) {
+    return "Setup needed: ADMIN_SECRET is not set for this deployment. Add it in Vercel → Settings → Environment Variables, then redeploy.";
+  }
   const username = String(form.get("username") ?? "").trim().toLowerCase();
   const password = String(form.get("password") ?? "");
-  const admin = username ? await db.getAdmin(username) : undefined;
-  if (!admin || !(await verifyPassword(password, admin.passwordHash))) return "Incorrect username or password.";
-  const { token, maxAge } = await createSessionToken(admin.username);
+  let token: string, maxAge: number;
+  try {
+    const admin = username ? await db.getAdmin(username) : undefined;
+    if (!admin || !(await verifyPassword(password, admin.passwordHash))) return "Incorrect username or password.";
+    ({ token, maxAge } = await createSessionToken(admin.username));
+  } catch (e) {
+    console.error("Admin login failed:", e);
+    return `Server error: ${e instanceof Error ? e.message : String(e)}`;
+  }
   (await cookies()).set(SESSION_COOKIE, token, {
     httpOnly: true,
     sameSite: "lax",
