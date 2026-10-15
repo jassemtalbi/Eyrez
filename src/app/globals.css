@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ivory: #fbf8f3;
+  --color-cream: #f6efe4;
+  --color-sand: #e9dcc8;
+  --color-linen: #d9c6a8;
+  --color-gold: #b08443;
+  --color-gold-light: #d4b072;
+  --color-gold-dark: #8a6430;
+  --color-cocoa: #6b4529;
+  --color-espresso: #3a2416;
+  --color-ink: #24170e;
+
+  --font-serif: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  --font-sans: "Jost", "Helvetica Neue", Arial, sans-serif;
+
+  --animate-fade-up: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-marquee: marquee 30s linear infinite;
+  --animate-slide-in: slide-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes slide-in {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+}
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--color-ivory);
+    color: var(--color-espresso);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--color-gold-light); color: var(--color-ink); }
+  h1, h2, h3, h4 { font-family: var(--font-serif); font-weight: 500; }
+}
+
+@utility container-x { @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-10; }
+@utility eyebrow { @apply text-[11px] font-medium uppercase tracking-[0.35em] text-gold; }
+@utility btn {
+  @apply inline-flex items-center justify-center gap-2 px-8 py-3.5 text-[12px] font-medium uppercase tracking-[0.25em] transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-50;
+}
+@utility btn-dark { @apply btn bg-espresso text-ivory hover:bg-gold; }
+@utility btn-gold { @apply btn bg-gold text-ivory hover:bg-espresso; }
+@utility btn-outline { @apply btn border border-espresso text-espresso hover:bg-espresso hover:text-ivory; }
+@utility btn-light { @apply btn border border-ivory/80 text-ivory hover:bg-ivory hover:text-espresso; }
+@utility gold-line { @apply h-px w-12 bg-gradient-to-r from-transparent via-gold to-transparent; }
+@utility input {
+  @apply w-full border border-linen bg-ivory px-4 py-3 text-sm text-espresso outline-none transition placeholder:text-cocoa/50 focus:border-gold;
+}
+@utility text-gold-gradient {
+  background: linear-gradient(110deg, #8a6430 0%, #d4b072 45%, #b08443 70%, #8a6430 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
