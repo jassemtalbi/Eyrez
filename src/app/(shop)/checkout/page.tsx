@@ -6,6 +6,7 @@ import { Check, Wallet } from "lucide-react";
 import { useStore } from "@/context/store";
 import { formatPrice } from "@/lib/config";
 import SmartImage from "@/components/SmartImage";
+import { placeOrder } from "@/app/actions";
 
 const governorates = [
   "Tunis", "Ariana", "Ben Arous", "Manouba", "Nabeul", "Zaghouan", "Bizerte", "Béja", "Jendouba", "Le Kef", "Siliana",
@@ -19,16 +20,24 @@ export default function CheckoutPage() {
   const { lines, subtotal, shipping, total, clear } = useStore();
   const [order, setOrder] = useState<Order | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     setSubmitting(true);
-    // TODO: connect to the order API / back-office once available.
-    await new Promise((r) => setTimeout(r, 900));
-    setOrder({ id: `EYZ-${Date.now().toString().slice(-6)}`, name: String(data.get("firstName")), total });
-    clear();
+    setError("");
+    const res = await placeOrder(
+      lines.map(({ productId, size, color, qty }) => ({ productId, size, color, qty })),
+      data,
+    ).catch(() => ({ ok: false as const, error: "Connection problem, please try again." }));
     setSubmitting(false);
+    if (!res.ok) {
+      setError(res.error);
+      return;
+    }
+    setOrder({ id: res.number, name: String(data.get("firstName")), total: res.total });
+    clear();
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -100,6 +109,7 @@ export default function CheckoutPage() {
             </label>
           </fieldset>
 
+          {error && <p role="alert" className="border border-gold bg-cream px-4 py-3 text-sm text-gold-dark">{error}</p>}
           <button type="submit" disabled={submitting} className="btn-dark w-full lg:hidden">
             {submitting ? "Placing order…" : `Place order — ${formatPrice(total)}`}
           </button>

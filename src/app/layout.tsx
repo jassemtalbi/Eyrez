@@ -1,11 +1,5 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { StoreProvider } from "@/context/store";
-import AnnouncementBar from "@/components/AnnouncementBar";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import CartDrawer from "@/components/CartDrawer";
-import Toast from "@/components/Toast";
 import { site } from "@/lib/config";
 
 export const metadata: Metadata = {
@@ -28,14 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="min-h-screen">
-        <StoreProvider>
-          <AnnouncementBar />
-          <Header />
-          <main>{children}</main>
-          <Footer />
-          <CartDrawer />
-          <Toast />
-        </StoreProvider>
+        {children}
       </body>
     </html>
   );

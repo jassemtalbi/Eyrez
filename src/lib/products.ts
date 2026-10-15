@@ -14,6 +14,7 @@ export type Product = {
   compareAt?: number;
   description: string;
   details: string[];
+  active?: boolean;
   colors: { name: string; hex: string }[];
   sizes: string[];
   images: string[];
@@ -66,7 +67,8 @@ const neutral = [
   { name: "Espresso", hex: "#4A2E1C" },
 ];
 
-export const products: Product[] = [
+/** Initial catalogue, copied into the database on first run. */
+export const seedProducts: Product[] = [
   {
     id: "p1",
     slug: "aurelia-satin-maxi-dress",
@@ -269,7 +271,6 @@ export const products: Product[] = [
   },
 ];
 
-export const getProduct = (slug: string) => products.find((p) => p.slug === slug);
 export const getCategory = (slug: string) => categories.find((c) => c.slug === slug);
 
 export const heroImages = {

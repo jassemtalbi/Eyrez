@@ -15,5 +15,6 @@ export const site = {
 };
 
 export function formatPrice(value: number) {
-  return `${value.toFixed(value % 1 === 0 ? 0 : 2)} ${site.currency}`;
+  const n = value.toLocaleString("en-US", { minimumFractionDigits: value % 1 === 0 ? 0 : 2, maximumFractionDigits: 2 });
+  return `${n} ${site.currency}`;
 }

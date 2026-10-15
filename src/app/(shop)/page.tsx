@@ -1,12 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
-import { heroImages, products } from "@/lib/products";
+import { heroImages } from "@/lib/products";
+import { getProducts } from "@/lib/db";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
 import SmartImage from "@/components/SmartImage";
 
-export default function Home() {
+export default async function Home() {
+  const products = await getProducts();
   const newIn = products.filter((p) => p.isNew).slice(0, 4);
 
   return (

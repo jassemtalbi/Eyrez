@@ -8,14 +8,7 @@ import Logo from "./Logo";
 import { useStore } from "@/context/store";
 import { categories } from "@/lib/products";
 
-const nav = [
-  { href: "/shop", label: "Shop All" },
-  { href: "/shop?filter=new", label: "New In" },
-  { href: "/shop?category=dresses", label: "Dresses" },
-  { href: "/shop?category=outerwear", label: "Outerwear" },
-  { href: "/shop?category=accessories", label: "Accessories" },
-  { href: "/about", label: "Our Story" },
-];
+const nav = [{ href: "/shop?filter=new", label: "New Arrivals" }];
 
 export default function Header() {
   const { count, wishlist, setCartOpen } = useStore();

@@ -1,12 +1,13 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { products, type Product } from "@/lib/products";
+import type { Product } from "@/lib/products";
 import { site } from "@/lib/config";
 
 export type CartLine = { key: string; productId: string; size: string; color: string; qty: number };
 
 type Store = {
+  products: Product[];
   lines: (CartLine & { product: Product })[];
   count: number;
   subtotal: number;
@@ -42,7 +43,7 @@ function save(key: string, value: unknown) {
   } catch {}
 }
 
-export function StoreProvider({ children }: { children: React.ReactNode }) {
+export function StoreProvider({ children, products }: { children: React.ReactNode; products: Product[] }) {
   const [cart, setCart] = useState<CartLine[]>([]);
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
@@ -104,6 +105,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     const subtotal = lines.reduce((s, l) => s + l.product.price * l.qty, 0);
     const shipping = subtotal === 0 || subtotal >= site.freeShippingThreshold ? 0 : site.shippingFee;
     return {
+      products,
       lines,
       count: lines.reduce((s, l) => s + l.qty, 0),
       subtotal,
@@ -119,7 +121,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
       setCartOpen,
       toast,
     };
-  }, [cart, wishlist, cartOpen, toast, add, setQty, remove, clear, toggleWish]);
+  }, [products, cart, wishlist, cartOpen, toast, add, setQty, remove, clear, toggleWish]);
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 import { ChevronDown, SlidersHorizontal, X } from "lucide-react";
-import { categories, products } from "@/lib/products";
+import { categories } from "@/lib/products";
+import { useStore } from "@/context/store";
 import { formatPrice } from "@/lib/config";
 import ProductCard from "@/components/ProductCard";
 
@@ -28,6 +29,7 @@ export default function ShopView() {
   const router = useRouter();
   const pathname = usePathname();
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const { products } = useStore();
 
   const category = params.get("category") ?? "";
   const filter = params.get("filter") ?? "";
@@ -66,7 +68,7 @@ export default function ShopView() {
       default: list.sort((a, b) => Number(!!b.bestseller) - Number(!!a.bestseller));
     }
     return list;
-  }, [category, filter, q, size, price, sort]);
+  }, [products, category, filter, q, size, price, sort]);
 
   const activeCat = categories.find((c) => c.slug === category);
   const title = q

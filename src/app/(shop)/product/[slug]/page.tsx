@@ -1,27 +1,29 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getCategory, getProduct, products } from "@/lib/products";
+import { getCategory } from "@/lib/products";
+import { getProductBySlug, getProducts } from "@/lib/db";
 import ProductDetail from "./ProductDetail";
 import ProductCard from "@/components/ProductCard";
 import SectionHeading from "@/components/SectionHeading";
 
 type Props = { params: Promise<{ slug: string }> };
 
-export function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
+export async function generateStaticParams() {
+  return (await getProducts()).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getProductBySlug(slug);
   return product ? { title: product.name, description: product.description } : {};
 }
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const product = getProduct(slug);
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
+  const products = await getProducts();
   const category = getCategory(product.category);
   const related = products.filter((p) => p.category === product.category && p.id !== product.id);
   const more = [...related, ...products.filter((p) => p.category !== product.category && p.bestseller)].slice(0, 4);
